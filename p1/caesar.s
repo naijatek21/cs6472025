@@ -93,11 +93,12 @@
         pushl %ebp                 #stores current value of ebp on time of stack
         movl %esp, %ebp            #Makes EBP point to top of stack
         movl 8(%esp), %esi         #puts the string address on top of the stack
+                           
         
         Conversion:
             lodsb                  #loads first byte in to eax
             jae $65, %esi Lower    #if the value is greater than 65(the ASCII value of 'a' jump to Lower)
-
+            jmp Exit               #Exit the function and return the character if it's not a letter
 
             Lower:
                 ja $0x5a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
