@@ -90,7 +90,40 @@
     # Input is always read in as a string. 
     # This function should convert a string to an integer.
     #
-    
+        pushl %ebp                 #stores current value of ebp on time of stack
+        movl %esp, %ebp            #Makes EBP point to top of stack
+        movl 8(%esp), %esi         #puts the string address on top of the stack
+        
+        Conversion:
+            lodsb                  #loads first byte in to eax
+            jae $65, %esi Lower    #if the value is greater than 65(the ASCII value of 'a' jump to Lower)
+
+
+            Lower:
+                ja $0x5a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
+                idiv $0x5a              #divides the ASCII value by 90 and stores the remainder in edx
+                movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
+
+                jmp Exit               #Exit the function
+
+            Upper:
+                ja $0x7a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
+                idiv $0x7a              #divides the ASCII value by 90 and stores the remainder in edx
+                movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
+                
+                jmp Exit               #Exit the function
+        
+        Exit:
+            movl %ebp, %esp         # Restore the old value of ESP
+            popl %ebp               # Restore the old value of EBP
+            ret                     # return
+
+
+
+
+
+
+
 
 
 
