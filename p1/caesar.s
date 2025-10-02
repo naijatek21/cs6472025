@@ -98,23 +98,27 @@
         Conversion:
             lodsb                  #loads first byte in to eax
             jae $65, %esi Lower    #if the value is greater than 65(the ASCII value of 'a' jump to Lower)
+            movl $-1, $eax         # Sets the return value as -1 if vharacter is not a valid alpha numeric
             jmp Exit               #Exit the function and return the character if it's not a letter
 
             Lower:
                 ja $0x5a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
                 idiv $0x5a              #divides the ASCII value by 90 and stores the remainder in edx
                 movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
-
                 jmp Exit               #Exit the function
 
             Upper:
-                ja $0x7a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
+                ja $0x7a, %eax, Exit   #if the value is greater than ACII value of 'z' then go to the Upper Section
                 idiv $0x7a              #divides the ASCII value by 90 and stores the remainder in edx
                 movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
                 
                 jmp Exit               #Exit the function
         
         Exit:
+            jae $0x7a, %eax, Negate #Check if the value is out of shiftable range
+            Negate:
+                movl $-1, $eax         # Sets the return value as -1 since character is not alphabetic
+
             movl %ebp, %esp         # Restore the old value of ESP
             popl %ebp               # Restore the old value of EBP
             ret                     # return
@@ -133,6 +137,18 @@
     #
     # Fill in code for CaesarCipher Function here
     #
+        call GetStringLength            # Gets the of the complete string
+        movl %eax, %edx                 # Puts the string length in the data register 
+        xor  %ecx, %ecx                 # sets counter to 0
+        movl %edx , %ebx                #puts the shiftr value in edx
+        Loop:
+            inc %ecx                    # increments edx to keep the count
+            lodsb                       # loads the character to eax
+            AtoI                        
+            add %edx, %eax              #adds the shift value to eax
+            jmp 
+#########################################FINishh###############################
+
 
 
     _start:
@@ -177,7 +193,12 @@
 
 
         # Convert the shift value from a string to an integer.
-        # FILL IN HERE
+        pushl $intBuffer
+        call  AtoI            # expect AtoI to return integer in EAX
+        addl  $4, %esp
+
+        # Save the integer shift for later use
+        movl  %eax, ShiftValue
 
 
         # Perform the caesar cipheR
