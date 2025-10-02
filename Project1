@@ -114,7 +114,7 @@ atoi_loop:
     cmpb    $'9', %cl
     jg      atoi_done
 
-    # Convert char → digit
+    # Convert char digit
     subb    $'0', %cl            # %cl = *s - '0'
     movl    %ecx, %edx          # digit = %ecx
 
@@ -185,6 +185,7 @@ cc_is_lowercase:
     divl    %ebx
     movl    %edx, %eax      # remainder is our new position
     addb    $'a', %al       # turn back into ASCII 'a'..'z'
+
     jmp     cc_store_char
 
 cc_store_char:
