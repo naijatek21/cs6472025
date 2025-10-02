@@ -87,58 +87,121 @@ AtoI:
     # Input is always read in as a string. 
     # This function should convert a string to an integer.
     
+AtoI:
+    
+    #
+    # Input is always read in as a string. 
+    # This function should convert a string to an integer.
+    
 
     pushl %ebp
     movl %esp, %ebp
 
-    movl 8(%ebp), %esi   # pointer to ASCII string (intBuffer)
-    xor %eax, %eax       # result = 0
+ # Get the argument 
+    movl    8(%ebp), %esi       # %esi = s
 
-AtoILoop:
-    movzbl (%esi), %ebx  # load current char into EBX (zero-extend)
-    cmp $0xa, %bl        # stop at newline
-    je AtoIDone
-    cmp $'0', %bl
-    jl AtoIDone
-    cmp $'9', %bl
-    jg AtoIDone
+    # Initialize result = 0
+    xorl    %eax, %eax          # %eax = 0
 
-    sub $'0', %bl        # convert ASCII → digit
-    imull $10, %eax      # result *= 10
-    addl %ebx, %eax      # result += digit
+atoi_loop:
+    # Load current character *s
+    movzbl  (%esi), %ecx        # %ecx = *s (unsigned byte)
 
-    incl %esi            # move to next char
-    jmp AtoILoop
+    # Stop if newline
+    cmpb    $'\n', %cl
+    je      atoi_done
 
-AtoIDone:
-    movl %ebp, %esp
-    popl %ebp
+    # Stop if below '0'
+    cmpb    $'0', %cl
+    jl      atoi_done
+
+    # Stop if above '9'
+    cmpb    $'9', %cl
+    jg      atoi_done
+
+    # Convert char → digit
+    subb    $'0', %cl            # %cl = *s - '0'
+    movl    %ecx, %edx          # digit = %ecx
+
+    # Multiply result by 10
+    imull   $10, %eax
+
+    # Add digit
+    imull   $10, %eax
+
+    # Add digit
+    addl    %edx, %eax
+
+    # Move to next character (s++)
+    incl    %esi
+    jmp     atoi_loop
+
+atoi_done:
+    leave
     ret
 
-pushl %ebp
+CaesarCipher:
+
+    #
+    # Fill in code for CaesarCipher Function here
+    #CaesarCipher:
+
+    pushl %ebp
     movl %esp, %ebp
 
-    movl 8(%ebp), %esi   # pointer to buffer
-    movl 12(%ebp), %ecx  # shift value
 
-    # normalize shift = shift % 26
-    movl %ecx, %eax
-    xorl %edx, %edx
-    movl $26, %ebx
-    divl %ebx            # quotient in EAX, remainder in EDX
-    movl %edx, %ecx      # ECX = normalized shift
+    movl    8(%ebp), %esi   # %esi reads through the text
+    movl    12(%ebp), %ecx  # %ecx keeps the shift
 
-#CipherLoop #Uppercase 
+cc_loop_start:
+    movzbl  (%esi), %eax    # Takes current character from the text
+    cmpb    $0, %al         # end of the string 
+    je      cc_loop_done       # yes , jump out of the loop
 
-#StoreChar:
-    movb %al, (%esi)     # store result
-    incl %esi
-    jmp CipherLoop
+    #  A–Z 
+    cmpb    $'A', %al       # char 'A'?
+    jl      not_a_letter    # yes, not a letter, skip it
+    cmpb    $'Z', %al       # char <= 'Z'?
+    jle     cc_is_uppercase    # yes, it's uppercase!
 
-#CipherDone:
-    movl %ebp, %esp
-    popl %ebp
-    ret 
+    # a–z
+    cmpb    $'a', %al       # is the char < 'a'?
+    jl      not_a_letter    # yes, not a letter, skip it
+    cmpb    $'z', %al       # is the char <= 'z'?
+    jle     cc_is_lowercase    # yes, it's lowercase!
+
+    jmp     cc_not_letter    #  it's not A–Z or a–z
+
+cc_is_uppercase:
+    subb    $'A', %al       # turn 'A' into 0, 'B' into 1, … 'Z' into 25
+    addl    %ecx, %eax      # add the shift value
+    movl    $26, %ebx       # we only have 26 letters
+    xorl    %edx, %edx      # clear remainder register
+    divl    %ebx            # divide result by 26
+    movl    %edx, %eax      # remainder 
+addb    $'A', %al       # turn it back into ASCII 'A'..'Z'
+    jmp     cc_store_char
+
+cc_is_lowercase:
+    subb    $'a', %al       # turn 'a' into 0, … 'z' into 25
+    addl    %ecx, %eax      # add the shift value
+    movl    $26, %ebx       # 26 letters in alphabet
+    xorl    %edx, %edx
+    divl    %ebx
+    movl    %edx, %eax      # remainder is our new position
+    addb    $'a', %al       # turn back into ASCII 'a'..'z'
+    jmp     cc_store_char
+
+cc_store_char:
+    movb    %al, (%esi)     # put the new shifted letter back
+
+cc_not_letter:
+    incl    %esi            # move to next character
+    jmp     cc_loop_start      # repeat
+
+cc_loop_done:
+leave
+ret
 
 _start:
 
