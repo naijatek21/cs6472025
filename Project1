@@ -81,11 +81,6 @@
         movl %ebp, %esp         # Restore the old value of ESP
         popl %ebp               # Restore the old value of EBP
         ret                     # return
-AtoI:
-    
-    #
-    # Input is always read in as a string. 
-    # This function should convert a string to an integer.
     
 AtoI:
     
