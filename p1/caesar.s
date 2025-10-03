@@ -95,58 +95,53 @@
         movl 8(%esp), %esi         #puts the string address on top of the stack
                            
         
-        Conversion:
-            lodsb                  #loads first byte in to eax
-            jae $65, %esi Lower    #if the value is greater than 65(the ASCII value of 'a' jump to Lower)
-            movl $-1, $eax         # Sets the return value as -1 if vharacter is not a valid alpha numeric
-            jmp Exit               #Exit the function and return the character if it's not a letter
-
-            Lower:
-                ja $0x5a, %eax, Upper   #if the value is greater than ACII value of 'z' then go to the Upper Section
-                idiv $0x5a              #divides the ASCII value by 90 and stores the remainder in edx
-                movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
-                jmp Exit               #Exit the function
-
-            Upper:
-                ja $0x7a, %eax, Exit   #if the value is greater than ACII value of 'z' then go to the Upper Section
-                idiv $0x7a              #divides the ASCII value by 90 and stores the remainder in edx
-                movl %edx, $eax         #sets the remainder as the return value essential doing a mod operation
-                
-                jmp Exit               #Exit the function
         
-        Exit:
-            jae $0x7a, %eax, Negate #Check if the value is out of shiftable range
-            Negate:
-                movl $-1, $eax         # Sets the return value as -1 since character is not alphabetic
-
-            movl %ebp, %esp         # Restore the old value of ESP
-            popl %ebp               # Restore the old value of EBP
-            ret                     # return
-
-
-
-
-
 
 
 
 
 
     CaesarCipher:
+        call GetStringLength            # Gets the length of the complete string
+        movl %eax, %ecx                 # Puts the string length in the count register 
+        movl  %ecx, %ecx                 # sets counter to 0
+        movl %edx , %ebx                #puts the shift value in edx
 
-    #
-    # Fill in code for CaesarCipher Function here
-    #
-        call GetStringLength            # Gets the of the complete string
-        movl %eax, %edx                 # Puts the string length in the data register 
-        xor  %ecx, %ecx                 # sets counter to 0
-        movl %edx , %ebx                #puts the shiftr value in edx
-        Loop:
-            inc %ecx                    # increments edx to keep the count
-            lodsb                       # loads the character to eax
-            AtoI                        
-            add %edx, %eax              #adds the shift value to eax
-            jmp 
+
+        Conversion:
+             lodsb                  #loads first byte in to eax
+             jae $65, %esi Upper    #if the value is greater than 65(the ASCII value of 'A' jump to Lower)
+             jmp Exit               #Exit the function and return the character if it's not a letter
+
+            Upper:
+                ja $0x5a, %eax, Upper   #if the value is greater than ACII value of 'Z' then go to the Lower Section
+                idiv $0x1a,%edx        #divides the ASCII value by 26 to get true shift distance and stores the remainder in edx
+                add  %eax, $edx        #performs the shift
+                ja $0x5a, %eax , UpperWrap         
+                UpperWrap:
+                    subi $0x1a,%eax    # IF shift will bring the balue beyond 'Z' wrap around
+                jmp Exit               #Exit the function
+
+            Lower:
+                ja $0x7a, %eax, Exit   #if the value is greater than ACII value of 'z' then exit the loop 
+                idiv $0x1a,%edx        #divides the ASCII value by 26 to get true shift distance and stores the remainder in edx
+                add  %eax, $edx        #performs the shift
+                ja $0x7a, %eax , LowerWrap         
+
+                LowerWrap:
+                    subi $0x1a,%eax    # IF shift will bring the balue beyond 'Z' wrap around
+                jmp Exit               #move to exit the function
+    
+            Exit:
+                movl %ebp, %esp         # Restore the old value of ESP
+                popl %ebp               # Restore the old value of EBP
+                ret                     # return
+        loop Conversion
+
+
+
+
+
 #########################################FINishh###############################
 
 
